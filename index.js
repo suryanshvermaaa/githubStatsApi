@@ -1,20 +1,7 @@
 /**
- * @file index.js
- * @description Entry point of the GitHub API server application.
+ * Main entry point of the application this will ignored for serverless deployment on vercel
  */
-import express from "expresspro";
-import router from "./routes/index.js";
-const app=express();
-
-// middleware to parse JSON requests
-app.use(express.json()).use(express.cors());
-
-// routes
-app.use("/",router);
-
-// error handling middleware
-app.use(express.error)
-
+import app from './app.js';
 // start the server
 const PORT=process.env.PORT || 3000;
 app.listen(PORT,()=>{
