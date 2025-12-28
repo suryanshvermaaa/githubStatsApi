@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { URL } from "node:url";
+
 export function skillsCard(skills) {
   // Normalize input: allow string or { name, color }
   const items = (skills || []).map((s) =>
@@ -43,6 +46,101 @@ export function skillsCard(skills) {
   const toKey = (name) => (name || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
   const colorFor = (name) => palette[toKey(name)] ?? { a: "#8b5cf6", b: "#22d3ee" };
 
+  // Resolve icon files from assets/skillicons and return data URI
+  const ICONS_BASE_URL = new URL("../assets/skillicons/", import.meta.url);
+  const iconMap = {
+    react: "React.svg",
+    reactjs: "React.svg",
+    node: "Node.js.svg",
+    nodejs: "Node.js.svg",
+    "node.js": "Node.js.svg",
+    typescript: "TypeScript.svg",
+    javascript: "JavaScript.svg",
+    html: "HTML5.svg",
+    html5: "HTML5.svg",
+    css: "CSS3.svg",
+    css3: "CSS3.svg",
+    docker: "Docker.svg",
+    graphql: "GraphQL.svg",
+    mongodb: "MongoDB.svg",
+    postgres: "PostgresSQL.svg",
+    postgresql: "PostgresSQL.svg",
+    aws: "AWS.svg",
+    gcp: "Google Cloud.svg",
+    googlecloud: "Google Cloud.svg",
+    go: "Go.svg",
+    python: "Python.svg",
+    redis: "Redis.svg",
+    kubernetes: "Kubernetes.svg",
+    jenkins: "Jenkins.svg",
+    next: "Next.js.svg",
+    nextjs: "Next.js.svg",
+    "next.js": "Next.js.svg",
+    express: "Express.png",
+    expressjs: "Express.png",
+    java: "Java.svg",
+    kafka: "Apache Kafka.svg",
+    "apachekafka": "Apache Kafka.svg",
+    argocd: "Argo CD.svg",
+    argo: "Argo CD.svg",
+    cmake: "CMake.svg",
+    c: "C.svg",
+    cpp: "C++ (CPlusPlus).svg",
+    "c++": "C++ (CPlusPlus).svg",
+    firebase: "Firebase.svg",
+  };
+
+  const iconDataURI = (name) => {
+    const file = iconMap[toKey(name)];
+    if (!file) return null;
+    try {
+      const url = new URL(file, ICONS_BASE_URL);
+      const buf = readFileSync(url);
+      const isPng = file.toLowerCase().endsWith(".png");
+      const mime = isPng ? "image/png" : "image/svg+xml";
+      return `data:${mime};base64,${Buffer.from(buf).toString("base64")}`;
+    } catch (_) {
+      return null;
+    }
+  };
+
+  // Professional display names (proper casing and acronyms)
+  const prettyMap = {
+    typescript: "TypeScript",
+    javascript: "JavaScript",
+    react: "React",
+    reactjs: "React",
+    next: "Next.js",
+    nextjs: "Next.js",
+    "next.js": "Next.js",
+    node: "Node.js",
+    nodejs: "Node.js",
+    "node.js": "Node.js",
+    postgresql: "PostgreSQL",
+    postgres: "PostgreSQL",
+    aws: "AWS",
+    gcp: "Google Cloud",
+    css: "CSS",
+    css3: "CSS3",
+    html: "HTML",
+    html5: "HTML5",
+    docker: "Docker",
+    graphql: "GraphQL",
+    mongodb: "MongoDB",
+    redis: "Redis",
+    go: "Go",
+    python: "Python",
+    java: "Java",
+  };
+  const prettyName = (name) => {
+    const k = toKey(name);
+    if (prettyMap[k]) return prettyMap[k];
+    return (name || "")
+      .replace(/[-_]+/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase())
+      .trim();
+  };
+
   // Layout: compute pill positions with row wrapping
   let x = left;
   let y = topPad + 54; // space for header
@@ -55,13 +153,15 @@ export function skillsCard(skills) {
   const txtW = (t) => Math.max(24, Math.round(t.length * 7.2));
 
   items.forEach((it, i) => {
-    const w = iconW + pillPadX * 2 + txtW(it.name);
+    const label = prettyName(it.name);
+    const w = iconW + pillPadX * 2 + txtW(label);
     if (x + w > right) {
       x = left;
       y += rowH;
     }
     const col = colorFor(it.name);
-    pills.push({ i, name: it.name, x, y, w, col });
+    const href = iconDataURI(it.name);
+    pills.push({ i, name: it.name, label, x, y, w, col, href });
     x += w + gap;
   });
 
@@ -75,7 +175,10 @@ export function skillsCard(skills) {
 
   const pillNodes = pills
     .map((p) => {
-      return `\n    <g transform="translate(${p.x}, ${p.y})">\n      <rect x="0" y="0" width="${p.w}" height="${pillH}" rx="999" fill="#111827" stroke="#1f2937" stroke-width="1"/>\n      <circle cx="${pillPadX + iconW / 2}" cy="${pillH / 2}" r="6" fill="url(#skill-${p.i})"/>\n      <text x="${pillPadX + iconW + 4}" y="${pillH / 2}" fill="#e5e7eb" font-family="${font}" font-size="13" font-weight="600" dominant-baseline="middle">${p.name}</text>\n    </g>`;
+      const iconNode = p.href
+        ? `<image x="${pillPadX}" y="${(pillH - 18) / 2}" width="18" height="18" href="${p.href}" />`
+        : `<circle cx="${pillPadX + iconW / 2}" cy="${pillH / 2}" r="6" fill="url(#skill-${p.i})"/>`;
+        return `\n    <g transform="translate(${p.x}, ${p.y})">\n      <rect x="0" y="0" width="${p.w}" height="${pillH}" rx="999" fill="#ffffff" stroke="url(#skill-${p.i})" stroke-opacity="0.35" stroke-width="1"/>\n      ${iconNode}\n      <text x="${pillPadX + iconW + 4}" y="${pillH / 2}" fill="#111827" font-family="${font}" font-size="13" font-weight="600" dominant-baseline="middle">${p.label}</text>\n    </g>`;
     })
     .join("");
 

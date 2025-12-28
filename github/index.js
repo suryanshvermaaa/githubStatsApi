@@ -6,7 +6,7 @@ import fetch from "node-fetch";
 import "dotenv/config";
 import NodeCache from "node-cache";
 const GITHUB_TOKEN = process.env.GITHUB_API_TOKEN;
-const DEFAULT_USERNAME = process.env.GITHUB_USERNAME || process.env.USERNAME;
+const DEFAULT_USERNAME = process.env.GITHUB_USERNAME;
 const cache = new NodeCache({ stdTTL: 60 * 60 * 6 });  // Cache for 6 hours
 
 /**
@@ -126,7 +126,7 @@ async function fetchData(customUsername) {
  * @param {string} username 
  * @returns {Promise<Array>} Top 5 programming languages by size  
  */
-const getTopLanguages = async (username) => {
+const getTopLanguages = async (username=DEFAULT_USERNAME) => {
   const cachedData = cache.get(username+"languages");
   if (cachedData) {
     return JSON.parse(cachedData);
@@ -152,7 +152,7 @@ const getTopLanguages = async (username) => {
  * @param {string} username 
  * @returns {Promise<Object>} GitHub user statistics
  */
-const getStats = async (username) => {
+const getStats = async (username=DEFAULT_USERNAME) => {
   const cachedData = cache.get(username+"stats");
   if (cachedData) {
     return JSON.parse(cachedData);

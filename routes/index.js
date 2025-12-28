@@ -4,7 +4,7 @@
  */
 
 import express from "expresspro";
-import {pingController,errorController,languagesController,statsController} from "../controllers/index.js";
+import {pingController,errorController,languagesController,statsController, skillsController} from "../controllers/index.js";
 
 const router = express.Router();
 
@@ -12,5 +12,6 @@ router.get("/ping", pingController);
 router.get("/error", errorController);
 router.get("/languages", languagesController);
 router.get("/stats", statsController);
+router.get("/skills", skillsController);
 
 export default router;
