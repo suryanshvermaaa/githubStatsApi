@@ -1,5 +1,8 @@
 import express from "expresspro";
-import { getStats, getTopLanguages } from "./github/index.js";
+import { getStats, getTopLanguages } from "../github/index.js";
+import {languagesCard} from "../cards/languages.js";
+import { statsCard } from "../cards/stats.js";
+import { skillsCard } from "../cards/skills.js";
 
 /**
  * @route GET /ping
@@ -26,8 +29,10 @@ export const errorController = express.asyncHandler((req,res)=>{
  */
 export const languagesController = express.asyncHandler(async (req, res) => {
   const { username } = req.query;
-  const profile = await getTopLanguages(username);
-  express.resp(res, 200, { message: "fetched data successfully", data: profile });
+  const languages = await getTopLanguages(username);
+  const SVG = languagesCard(languages);
+  res.set("Content-Type", "image/svg+xml");
+  res.send(SVG);
 });
 
 /**
@@ -37,6 +42,21 @@ export const languagesController = express.asyncHandler(async (req, res) => {
  */
 export const statsController = express.asyncHandler(async (req, res) => {
   const { username } = req.query;
-  const profile = await getStats(username);
-  express.resp(res, 200, { message: "fetched data successfully", data: profile });
+  const stats = await getStats(username);
+  const SVG = statsCard({commits: stats.totalCommits, prs: stats.totalPRs, issues: stats.totalIssues});
+  res.set("Content-Type", "image/svg+xml");
+  res.send(SVG);
+});
+
+/**
+ * @route GET /skills
+ * @desc Fetch skills card for a user
+ * @access Public
+ */
+export const skillsController = express.asyncHandler(async (req, res) => {
+  const { skills } = req.query; // skills saparated by commas
+  const skillsArray = skills ? skills.split(",").map(s => s.trim()) : [];
+  const SVG = skillsCard(skillsArray);
+  res.set("Content-Type", "image/svg+xml");
+  res.send(SVG);
 });
