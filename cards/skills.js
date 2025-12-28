@@ -178,7 +178,7 @@ export function skillsCard(skills) {
       const iconNode = p.href
         ? `<image x="${pillPadX}" y="${(pillH - 18) / 2}" width="18" height="18" href="${p.href}" />`
         : `<circle cx="${pillPadX + iconW / 2}" cy="${pillH / 2}" r="6" fill="url(#skill-${p.i})"/>`;
-        return `\n    <g transform="translate(${p.x}, ${p.y})">\n      <rect x="0" y="0" width="${p.w}" height="${pillH}" rx="999" fill="#ffffff" stroke="url(#skill-${p.i})" stroke-opacity="0.35" stroke-width="1"/>\n      ${iconNode}\n      <text x="${pillPadX + iconW + 4}" y="${pillH / 2}" fill="#111827" font-family="${font}" font-size="13" font-weight="600" dominant-baseline="middle">${p.label}</text>\n    </g>`;
+      return `\n    <g transform="translate(${p.x}, ${p.y})">\n      <rect x="0" y="0" width="${p.w}" height="${pillH}" rx="999" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>\n      ${iconNode}\n      <text x="${pillPadX + iconW + 4}" y="${pillH / 2}" fill="#111827" font-family="${font}" font-size="13" font-weight="600" dominant-baseline="middle">${p.label}</text>\n    </g>`;
     })
     .join("");
 
